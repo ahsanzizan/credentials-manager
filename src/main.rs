@@ -1,7 +1,6 @@
 mod credentials_manager;
 
 use credentials_manager::CredentialsManager;
-use std::borrow::Borrow;
 use std::env;
 use std::process;
 
