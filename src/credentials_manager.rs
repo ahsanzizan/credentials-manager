@@ -2,8 +2,13 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error, Write};
 
+pub(crate) struct Credentials {
+    pub username: String,
+    pub password: String,
+}
+
 pub(crate) struct CredentialsManager {
-    credentials: HashMap<String, String>,
+    credentials: HashMap<String, Credentials>,
 }
 
 // Shifting values for trithemius cipher
@@ -16,9 +21,15 @@ impl CredentialsManager {
         }
     }
 
-    pub fn add_credential(&mut self, key: &str, password: &str) {
+    pub fn add_credential(&mut self, key: &str, username: &str, password: &str) {
         let encrypted_password = self.encrypt_password(password);
-        self.credentials.insert(key.to_string(), encrypted_password);
+        self.credentials.insert(
+            key.to_string(),
+            Credentials {
+                username: username.to_string(),
+                password: encrypted_password,
+            },
+        );
     }
 
     pub fn encrypt_password(&self, password: &str) -> String {
@@ -45,7 +56,7 @@ impl CredentialsManager {
         result
     }
 
-    pub fn decrypt_password(&self, encrypted_password: &str) -> String {
+    fn decrypt_password(&self, encrypted_password: &str) -> String {
         let chars: Vec<char> = encrypted_password.chars().collect();
 
         let mut result = String::new();
@@ -69,18 +80,21 @@ impl CredentialsManager {
         result
     }
 
-    pub fn get_credential(&mut self, key: &str) -> Option<String> {
+    pub fn get_credential(&mut self, key: &str) -> Option<Credentials> {
         match self.load_from_file(&format!("{key}.txt")) {
             Ok(credentials_manager) => self.credentials = credentials_manager.credentials,
             Err(e) => println!("Error getting credential: {}", e),
         };
-        self.credentials.get(key).map(|s| self.decrypt_password(s))
+        self.credentials.get(key).map(|s| Credentials {
+            username: s.username.to_string(),
+            password: self.decrypt_password(&s.password),
+        })
     }
 
     pub fn save_to_file(&self, filename: &str) -> Result<(), Error> {
         let mut file = File::create(filename)?;
-        for (key, value) in &self.credentials {
-            writeln!(file, "{} {}", key, value)?;
+        for (_, value) in &self.credentials {
+            writeln!(file, "{} {}", value.username, value.password)?;
         }
         Ok(())
     }
@@ -94,8 +108,12 @@ impl CredentialsManager {
             let line = line?;
             let mut parts = line.split_whitespace();
             let key = parts.next().unwrap().to_string();
+            let username = parts.next().unwrap().to_string();
             let password = parts.next().unwrap().to_string();
-            credentials_manager.credentials.insert(key, password);
+
+            credentials_manager
+                .credentials
+                .insert(key, Credentials { username, password });
         }
 
         Ok(credentials_manager)

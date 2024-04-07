@@ -1,6 +1,7 @@
 mod credentials_manager;
 
 use credentials_manager::CredentialsManager;
+use std::borrow::Borrow;
 use std::env;
 use std::process;
 
@@ -18,12 +19,13 @@ fn main() {
     match command.as_str() {
         "add" => {
             if args.len() != 4 {
-                println!("Usage: add <key> <password>");
+                println!("Usage: add <key> <username> <password>");
                 process::exit(1);
             }
             let key = &args[2];
-            let password = &args[3];
-            credentials_manager.add_credential(key, password);
+            let username = &args[3];
+            let password = &args[4];
+            credentials_manager.add_credential(key, &username, &password);
 
             match credentials_manager.save_to_file(&format!("{key}.txt")) {
                 Ok(_) => println!("Credentials saved to file."),
@@ -37,8 +39,11 @@ fn main() {
             }
             let key = &args[2];
             match credentials_manager.get_credential(key) {
-                Some(password) => println!("Password: {}", password),
-                None => println!("No password found for key: {}", key),
+                Some(c) => {
+                    println!("Username: {}", c.username);
+                    println!("Password: {}", c.password);
+                }
+                None => println!("No credential found for key: {}", key),
             }
         }
         _ => {
