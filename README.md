@@ -13,7 +13,7 @@ cargo build --release
 ### Add new credential:
 
 ```bash
-./target/release/credential-manager add <username> <password>
+./target/release/credential-manager add <key> <username> <password>
 ```
 
 ### Get existing credential:
