@@ -19,5 +19,5 @@ cargo build --release
 ### Get existing credential:
 
 ```bash
-./target/release/credential-manager get <username>
+./target/release/credential-manager get <key>
 ```
