@@ -6,6 +6,9 @@ pub(crate) struct CredentialsManager {
     credentials: HashMap<String, String>,
 }
 
+// Shifting values for trithemius cipher
+const CIPHER_SHIFT: u8 = 4;
+
 impl CredentialsManager {
     pub fn new() -> CredentialsManager {
         CredentialsManager {
@@ -19,13 +22,51 @@ impl CredentialsManager {
     }
 
     pub fn encrypt_password(&self, password: &str) -> String {
-        // Simple encryption: reverse the password string
-        password.chars().rev().collect::<String>()
+        let chars: Vec<char> = password.chars().collect();
+
+        let mut result = String::new();
+
+        for &c in chars.iter() {
+            if c.is_alphabetic() {
+                let base = if c.is_lowercase() {
+                    'a' as u8
+                } else {
+                    'A' as u8
+                };
+                // 26 is the total number of letters
+                let encrypted_char = ((((c as u8 - base) + CIPHER_SHIFT) % 26) + base) as char;
+
+                result.push(encrypted_char);
+            } else {
+                result.push(c);
+            }
+        }
+
+        result
     }
 
     pub fn decrypt_password(&self, encrypted_password: &str) -> String {
-        // Simple decryption: reverse the string back
-        encrypted_password.chars().rev().collect::<String>()
+        let chars: Vec<char> = encrypted_password.chars().collect();
+
+        let mut result = String::new();
+
+        for &c in chars.iter() {
+            if c.is_alphabetic() {
+                let base = if c.is_lowercase() {
+                    'a' as u8
+                } else {
+                    'A' as u8
+                };
+                // 26 is the total number of letters
+                let decrypted_char = ((((c as u8 - base) + 26 - CIPHER_SHIFT) % 26) + base) as char;
+
+                result.push(decrypted_char);
+            } else {
+                result.push(c);
+            }
+        }
+
+        result
     }
 
     pub fn get_credential(&mut self, key: &str) -> Option<String> {
