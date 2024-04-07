@@ -17,7 +17,7 @@ fn main() {
 
     match command.as_str() {
         "add" => {
-            if args.len() != 4 {
+            if args.len() != 5 {
                 println!("Usage: add <key> <username> <password>");
                 process::exit(1);
             }
