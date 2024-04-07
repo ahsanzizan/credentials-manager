@@ -33,7 +33,7 @@ fn main() {
         }
         "get" => {
             if args.len() != 3 {
-                println!("Usage: get <key>.txt");
+                println!("Usage: get <key>");
                 process::exit(1);
             }
             let key = &args[2];
