@@ -94,7 +94,7 @@ impl CredentialsManager {
     pub fn save_to_file(&self, filename: &str) -> Result<(), Error> {
         let mut file = File::create(filename)?;
         for (_, value) in &self.credentials {
-            writeln!(file, "{} {}", value.username, value.password)?;
+            writeln!(file, "{} {} {}", value.key, value.username, value.password)?;
         }
         Ok(())
     }
